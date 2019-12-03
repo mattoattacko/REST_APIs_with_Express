@@ -4,8 +4,8 @@ const app = express();
 const records = require('./records');
 
 // Send a GET request to /quotes to READ a list of quotes
-app.get('/quotes', (req, res)=>{
-  const quotes = records.getQuotes();
+app.get('/quotes', async (req, res)=>{
+  const quotes = await records.getQuotes();
   res.json(quotes);
 });
 
