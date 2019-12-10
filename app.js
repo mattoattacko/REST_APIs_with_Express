@@ -73,6 +73,24 @@ app.delete('/quotes/:id', async (req, res) => {
     res.status(500).json({message: err.message});
   }
 });
+
+
 // Send a GET request to /quotes/quote/random to READ (view) a random quote
+
+app.use((req, res, next) => {
+  const err = new Error("Not Found");
+  err.status = 404;
+  next(err);
+});
+
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.json({
+    error: {
+      message: err.message
+    }
+  })
+});
+
 
 app.listen(3000, () => console.log('Quote API listening on port 3000!'));
