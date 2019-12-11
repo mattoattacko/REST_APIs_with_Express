@@ -3,6 +3,16 @@ const app = express();
 
 const records = require('./records');
 
+function asyncHandler(cb) {
+  return async (req, res, next) => {
+    try {
+      await cb(req, res, next);
+    } catch(err) {
+        next(err);
+    }
+  }
+}
+
 app.use(express.json());
 
 // Send a GET request to /quotes to READ a list of quotes
@@ -26,8 +36,23 @@ app.get('/quotes/:id', async (req, res)=>{
 });
 
 // Send a POST request to /quotes to  CREATE a new quote 
-app.post('/quotes', async (req,res) =>{
-  try {
+// app.post('/quotes', async (req,res) =>{
+//   try {
+//     if(req.body.author && req.body.quote){
+//       const quote = await records.createQuote({
+//         quote: req.body.quote,
+//         author: req.body.author
+//       });
+//         res.status(201).json(quote);
+//       } else {
+//         res.status(400).json({message: "Quote and author required."});
+//       }
+//   } catch(err) {
+//       res.status(500).json({message: err.message});
+//   } 
+// });
+
+app.post('/quotes', asyncHandler( async (req, res) => {
     if(req.body.author && req.body.quote){
       const quote = await records.createQuote({
         quote: req.body.quote,
@@ -37,16 +62,11 @@ app.post('/quotes', async (req,res) =>{
       } else {
         res.status(400).json({message: "Quote and author required."});
       }
-  } catch(err) {
-      res.status(500).json({message: err.message});
-  } 
-});
-
+}));
 
 // Send a PUT request to /quotes/:id to UPDATE (edit) a quote
-app.put('/quotes/:id', async (req, res) => {
-  try {
-    const quote = await records.getQuote(req.params.id);
+app.put('/quotes/:id', asyncHandler (async (req, res) => {
+  const quote = await records.getQuote(req.params.id);
     if(quote){
       quote.quote = req.body.quote;
       quote.author = req.body.author;
@@ -56,11 +76,7 @@ app.put('/quotes/:id', async (req, res) => {
     } else {
       res.status(404).json({message: "Quote Not Found"});
     }
-    records.updateQuote()
-  }catch(err) {
-    res.status(500).json({message: err.message});
-  }
-});
+}));
 
 
 // Send a DELETE request to /quotes/:id DELETE a quote 
